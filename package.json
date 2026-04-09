@@ -1,0 +1,12 @@
+{
+  "name": "sadady-salla-theme",
+  "version": "0.3.2",
+  "private": true,
+  "description": "Sadady Salla theme based on the current sadady.com UI",
+  "scripts": {
+    "validate": "node ./scripts/validate-theme.mjs",
+    "lint": "echo \"lint is handled by the Salla theme toolchain\"",
+    "build": "echo \"build is handled by Salla CLI / Partners Portal\"",
+    "preview": "echo \"preview is handled by Salla CLI / Partners Portal\""
+  }
+}

@@ -1,0 +1,15 @@
+.status-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 32px;
+  padding: .35rem .75rem;
+  border-radius: 999px;
+  font-size: .85rem;
+  font-weight: 700;
+  background: #fff7ed;
+  color: #9a3412;
+}
+.status-chip-in_progress { background: #eff6ff; color: #1d4ed8; }
+.status-chip-completed { background: #ecfdf5; color: #047857; }
+.status-chip-needs_attention { background: #fff7ed; color: #c2410c; }
