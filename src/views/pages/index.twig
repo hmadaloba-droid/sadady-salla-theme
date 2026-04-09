@@ -3,10 +3,7 @@
 {% block title %}Sadady Main Site{% endblock %}
 
 {% block landing_content %}
-  {% include "components/sadady/home/hero-banner.twig" %}
-  {% include "components/sadady/home/service-modes.twig" %}
-  {% include "components/sadady/home/request-form-sadad.twig" %}
-  {% include "components/sadady/home/request-form-external.twig" %}
+  {% component home %}
 {% endblock %}
 
 {% block scripts %}
