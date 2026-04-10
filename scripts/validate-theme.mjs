@@ -10,6 +10,8 @@ const requiredFiles = [
   "theme-config-contract.md",
   "theme-config.example.json",
   "twilight.json",
+  "src/locales/ar.json",
+  "src/locales/en.json",
   "assets/js/sadady/theme-api.js",
   "assets/js/sadady/api-client.js",
   "assets/js/sadady/live-home.js",
@@ -28,11 +30,11 @@ const requiredFiles = [
 const requiredSnippets = [
   {
     file: "src/views/layouts/master.twig",
-    snippets: ["window.SADADY_SALLA_CUSTOMER", "window.SADADY_DEBUG_CUSTOMER", "js/sadady/theme-api.js", "js/sadady/session-strip.js"],
+    snippets: ["js/sadady/theme-api.js", "js/sadady/auth.js", "js/sadady/session-strip.js", "body:classes", "sadady-api-base"],
   },
   {
     file: "src/views/pages/index.twig",
-    snippets: ["js/sadady/quote-flow.js", "js/sadady/checkout-flow.js"],
+    snippets: ["js/sadady/live-home.js", "js/sadady/quote-flow.js", "js/sadady/checkout-flow.js"],
   },
   {
     file: "src/views/pages/tracking.twig",
@@ -44,16 +46,24 @@ const requiredSnippets = [
   },
   {
     file: "assets/js/sadady/theme-api.js",
-    snippets: ["window.SADADY_API_BASE", "window.SADADY_THEME_STATE", "document.documentElement.dataset.sadadyThemeReady"],
+    snippets: ["window.SADADY_API_BASE", "window.SADADY_THEME_STATE", "setMultilineText", "readMetaContent", "document.documentElement.dataset.sadadyThemeReady"],
   },
   {
     file: "assets/js/sadady/api-client.js",
-    snippets: ["window.SADADY_API_BASE", "X-Sadady-Customer-Id", "api/v1/public/quotes/calculate", "api/v1/public/orders/precreate"],
+    snippets: ["DEFAULT_API_BASE", "Authorization", "getSallaSdkSessionCandidate", "api/v1/public/quotes/calculate", "api/v1/public/orders/precreate"],
   },
   {
     file: "assets/js/sadady/session-strip.js",
     snippets: ["getSessionSummary", "sadady:auth-success"],
   },
+];
+
+const forbiddenFiles = [
+  "assets/js/sadady/ui-state.js",
+  "assets/css/sadady-theme.css",
+  "src/views/components/sadady/journey/otp-request-form.twig",
+  "src/views/components/sadady/journey/otp-verify-form.twig",
+  "src/views/components/sadady/customer/customer-status-chip.twig",
 ];
 
 const failures = [];
@@ -81,6 +91,13 @@ function checkSnippets({ file, snippets }) {
 
 for (const relPath of requiredFiles) {
   checkFile(relPath);
+}
+
+for (const relPath of forbiddenFiles) {
+  const fullPath = resolve(themeRoot, relPath);
+  if (existsSync(fullPath)) {
+    failures.push(`Forbidden legacy file still exists: ${relPath}`);
+  }
 }
 
 for (const check of requiredSnippets) {

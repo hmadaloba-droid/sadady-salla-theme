@@ -327,6 +327,17 @@
   color: #166534;
 }
 
+.success-subtitle {
+  margin: 1rem 0 0;
+  border: 1px solid #fed7aa;
+  background: #fff7ed;
+  color: #9a3412;
+  border-radius: 1rem;
+  padding: 0.85rem 1rem;
+  line-height: 1.8;
+  font-size: 0.92rem;
+}
+
 @media (max-width: 520px) {
   .login-box {
     padding: 1.5rem;

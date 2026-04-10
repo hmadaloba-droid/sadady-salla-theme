@@ -20,5 +20,6 @@ function updateSessionStrip() {
 }
 
 window.addEventListener("sadady:auth-success", updateSessionStrip);
+window.addEventListener("sadady:auth-change", updateSessionStrip);
 document.addEventListener("DOMContentLoaded", updateSessionStrip);
 updateSessionStrip();

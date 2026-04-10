@@ -96,6 +96,15 @@ function getOrderDate(order, keys) {
   return value ? new Date(value).toLocaleString("ar-SA") : "-";
 }
 
+function renderTrackingMessage(message) {
+  if (!trackingResult) return;
+
+  const wrapper = document.createElement("div");
+  wrapper.className = "tracking-result-empty";
+  wrapper.textContent = message;
+  trackingResult.replaceChildren(wrapper);
+}
+
 function syncTrackingSession() {
   const summary = getSessionSummary();
   document.querySelectorAll("[data-sadady-session-title]").forEach((node) => {
@@ -117,6 +126,9 @@ function syncTrackingSession() {
     node.dataset.sessionState = summary.isSalla ? "connected" : "disconnected";
   });
 }
+
+window.addEventListener("sadady:auth-success", syncTrackingSession);
+window.addEventListener("sadady:auth-change", syncTrackingSession);
 
 function renderTracking(order) {
   const timeline = (order.timeline || []).map((item) => `
@@ -160,16 +172,16 @@ function renderTracking(order) {
 async function searchTracking(query) {
   const value = String(query || "").trim();
   if (!value) {
-    trackingResult.innerHTML = '<div class="tracking-result-empty">أدخل رقم الطلب أو رقم التتبع أولًا.</div>';
+    renderTrackingMessage("أدخل رقم الطلب أو رقم التتبع أولًا.");
     return;
   }
 
-  trackingResult.innerHTML = '<div class="tracking-result-empty">جارٍ جلب بيانات الطلب...</div>';
+  renderTrackingMessage("جارٍ جلب بيانات الطلب...");
   try {
     const order = await getTracking(value);
     renderTracking(order);
   } catch (error) {
-    trackingResult.innerHTML = `<div class="tracking-result-empty">${error.message || "لم يتم العثور على الطلب."}</div>`;
+    renderTrackingMessage(error.message || "لم يتم العثور على الطلب.");
   }
 }
 

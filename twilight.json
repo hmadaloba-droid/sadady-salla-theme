@@ -1,14 +1,14 @@
 {
   "name": {
     "ar": "سدادي",
-    "en": "Sadady Current Site Port"
+    "en": "Sadady"
   },
-  "theme_name": "Sadady Current Site Port",
+  "theme_name": "Sadady",
   "author": "Sadady",
   "author_email": "support@sadady.com",
   "version": "0.3.2",
-  "repository": "https://github.com/hmadaloba-droid/sadady-salla-theme",
-  "repo_url": "https://github.com/hmadaloba-droid/sadady-salla-theme",
+  "repository": "https://github.com/hmadaloba-droid/sadady-salla-theme-clean",
+  "repo_url": "https://github.com/hmadaloba-droid/sadady-salla-theme-clean",
   "support_url": "https://sadady.com",
   "settings": [
     {
@@ -27,54 +27,5 @@
     }
   ],
   "features": [],
-  "components": [
-    {
-      "name": "sadady-hero-banner",
-      "title": "Sadady Hero Banner",
-      "icon": "sicon-image",
-      "path": "home.hero-banner",
-      "display_name": {
-        "ar": "الهيرو الرئيسي",
-        "en": "Hero Banner"
-      },
-      "fields": [],
-      "schema": {}
-    },
-    {
-      "name": "sadady-service-modes",
-      "title": "Service Modes",
-      "icon": "sicon-timer",
-      "path": "home.service-modes",
-      "display_name": {
-        "ar": "بطاقات الخدمات",
-        "en": "Service Modes"
-      },
-      "fields": [],
-      "schema": {}
-    },
-    {
-      "name": "sadady-request-form-sadad",
-      "title": "Sadad Request Form",
-      "icon": "sicon-files",
-      "path": "home.request-form-sadad",
-      "display_name": {
-        "ar": "نموذج مدفوعات سداد",
-        "en": "Sadad Request Form"
-      },
-      "fields": [],
-      "schema": {}
-    },
-    {
-      "name": "sadady-request-form-external",
-      "title": "External Request Form",
-      "icon": "sicon-files",
-      "path": "home.request-form-external",
-      "display_name": {
-        "ar": "نموذج الفواتير الأخرى",
-        "en": "External Request Form"
-      },
-      "fields": [],
-      "schema": {}
-    }
-  ]
+  "components": []
 }

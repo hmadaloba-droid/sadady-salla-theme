@@ -28,5 +28,6 @@ goToCustomerBtn?.addEventListener("click", () => {
 });
 
 window.addEventListener("sadady:auth-success", syncCustomerButton);
+window.addEventListener("sadady:auth-change", syncCustomerButton);
 document.addEventListener("DOMContentLoaded", syncCustomerButton);
 syncCustomerButton();

@@ -8,6 +8,7 @@ const successProviderName = document.getElementById("successProviderName");
 const successCollectionStatus = document.getElementById("successCollectionStatus");
 const successSallaSyncStatus = document.getElementById("successSallaSyncStatus");
 const successTrackingLink = document.getElementById("successTrackingLink");
+const successResolutionNote = document.getElementById("successResolutionNote");
 
 function getOrderValue(order, keys, fallback = "-") {
   for (const key of keys) {
@@ -65,6 +66,12 @@ function syncSessionStrip() {
   });
 }
 
+function setResolutionNote(message) {
+  if (successResolutionNote) {
+    successResolutionNote.textContent = message;
+  }
+}
+
 async function loadOrderSummary() {
   const query = new URLSearchParams(window.location.search);
   const trackingNo = query.get("tracking_no");
@@ -89,19 +96,26 @@ async function loadOrderSummary() {
         status: journey.collection_status || "بانتظار التحصيل",
       },
     });
+    setResolutionNote("تم حفظ ملخص الرحلة محليًا. ستظهر البيانات النهائية هنا بعد اكتمال الإرجاع من مسار سدادي أو من سلة.");
     if (successTrackingLink) successTrackingLink.href = "/customer/orders";
     return;
   }
 
-  if (!lookupValue) return;
+  if (!lookupValue) {
+    setResolutionNote("لا يوجد رقم تتبع أو رقم طلب في الرابط حاليًا. يمكنك متابعة الطلب لاحقًا من صفحة التتبع أو من طلباتك داخل سلة.");
+    return;
+  }
 
   try {
     const order = await getTracking(lookupValue);
     applyOrderSummary(order);
+    setResolutionNote("تم تحميل ملخص الطلب من واجهة سدادي بنجاح، ويمكنك متابعة آخر حالاته من صفحة التتبع.");
     if (successTrackingLink) successTrackingLink.href = `/tracking?tracking_no=${encodeURIComponent(order.tracking_no)}`;
   } catch {
-    // Keep fallback placeholders when the query cannot be resolved.
+    setResolutionNote("تعذر جلب تفاصيل الطلب الآن. يمكنك إعادة المحاولة من صفحة التتبع أو الرجوع إلى طلباتك داخل سلة.");
   }
 }
 
+window.addEventListener("sadady:auth-success", syncSessionStrip);
+window.addEventListener("sadady:auth-change", syncSessionStrip);
 loadOrderSummary();
