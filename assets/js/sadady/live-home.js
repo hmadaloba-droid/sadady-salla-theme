@@ -57,6 +57,7 @@ function initHome() {
 }
 
 window.addEventListener("sadady:auth-success", () => syncSessionWidget());
+window.addEventListener("sadady:auth-change", () => syncSessionWidget());
 if (document.readyState === "loading") {
   document.addEventListener("DOMContentLoaded", initHome, { once: true });
 } else {

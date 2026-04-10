@@ -1,14 +1,13 @@
-const API_BASE = window.SADADY_API_BASE || window.sadadyThemeConfig?.api_base_url || "https://api.sadady.com";
-const USE_MOCK_API = window.SADADY_USE_MOCK_API === true;
-const DEMO_OTP_CODE = "1111";
+const DEFAULT_API_BASE = "https://api.sadady.com";
 
 const STORAGE_KEYS = {
   session: "sadady.theme.session",
-  otpRequests: "sadady.theme.otpRequests",
-  orders: "sadady.theme.orders",
   pendingJourney: "sadady.theme.pendingJourney",
   currentJourney: "sadady.theme.currentJourney",
 };
+
+const SESSION_SYNC_ATTEMPTS = 20;
+const SESSION_SYNC_DELAY_MS = 500;
 
 function readJson(key, fallback) {
   try {
@@ -27,13 +26,12 @@ function removeValue(key) {
   localStorage.removeItem(key);
 }
 
-function normalizeMobile(value) {
-  return String(value || "").replace(/\s+/g, "").trim();
+function stringValue(value) {
+  return String(value || "").trim();
 }
 
-function toMoneyNumber(value) {
-  const normalized = String(value || "").replace(/[^\d.]/g, "");
-  return Number(normalized || 0);
+function normalizeMobile(value) {
+  return stringValue(value).replace(/\s+/g, "");
 }
 
 function generateId(prefix) {
@@ -41,24 +39,108 @@ function generateId(prefix) {
   return `${prefix}_${Date.now().toString(36).toUpperCase()}${random}`;
 }
 
-function generateTrackingNo() {
-  const date = new Date();
-  const yy = String(date.getFullYear()).slice(-2);
-  const mm = String(date.getMonth() + 1).padStart(2, "0");
-  const dd = String(date.getDate()).padStart(2, "0");
-  const tail = Math.floor(Math.random() * 900000 + 100000);
-  return `SAD-${yy}${mm}${dd}-${tail}`;
+function getApiBase() {
+  return window.SADADY_API_BASE || window.sadadyThemeConfig?.api_base_url || DEFAULT_API_BASE;
 }
 
-async function callLiveApi(path, options = {}) {
-  const response = await fetch(`${API_BASE}${path}`, {
-    headers: getCustomerApiHeaders({
-      Accept: "application/json",
-      "Content-Type": "application/json",
-      ...(options.headers || {}),
-    }),
-    ...options,
+function getSallaSdk() {
+  return typeof window !== "undefined" ? window.salla || null : null;
+}
+
+function readSallaConfig(key) {
+  const sdk = getSallaSdk();
+  try {
+    return typeof sdk?.config?.get === "function" ? sdk.config.get(key) : null;
+  } catch {
+    return null;
+  }
+}
+
+function readSallaStorage(key) {
+  const sdk = getSallaSdk();
+  try {
+    if (typeof sdk?.storage?.get === "function") return sdk.storage.get(key);
+    if (typeof sdk?.store?.get === "function") return sdk.store.get(key);
+  } catch {
+    return null;
+  }
+  return null;
+}
+
+function extractTokenValue(rawToken) {
+  if (!rawToken) return "";
+  if (typeof rawToken === "string") return stringValue(rawToken);
+  if (typeof rawToken !== "object") return "";
+
+  return stringValue(
+    rawToken.access_token ||
+    rawToken.accessToken ||
+    rawToken.token ||
+    rawToken.value,
+  );
+}
+
+function getSallaSdkSessionCandidate() {
+  const user = readSallaConfig("user");
+  const rawToken = readSallaStorage("token") || readSallaConfig("token");
+  const sessionToken = extractTokenValue(rawToken);
+
+  if (!user && !sessionToken) return null;
+
+  return sanitizeSession({
+    customer_id: user?.id,
+    customer_name: user?.name || `${stringValue(user?.first_name)} ${stringValue(user?.last_name)}`.trim(),
+    mobile: user?.mobile || user?.phone,
+    email: user?.email,
+    session_token: sessionToken,
+    source: "salla-sdk",
   });
+}
+
+function sanitizeSession(value) {
+  if (!value || typeof value !== "object") return null;
+
+  const customerId = stringValue(value.customer_id || value.customerId || value.id);
+  const rawCustomerName = stringValue(value.customer_name || value.customerName || value.name);
+  const mobile = normalizeMobile(value.mobile || value.phone);
+  const email = stringValue(value.email);
+  const sessionToken = stringValue(value.session_token || value.sessionToken || value.token);
+  const source = stringValue(value.source) || "salla";
+  const createdAt = stringValue(value.created_at || value.createdAt) || new Date().toISOString();
+
+  if (!customerId && !rawCustomerName && !mobile && !email && !sessionToken) {
+    return null;
+  }
+
+  const customerName = rawCustomerName || "عميل سدادي";
+
+  return {
+    customer_id: customerId,
+    customer_name: customerName,
+    name: customerName,
+    mobile,
+    email,
+    session_token: sessionToken,
+    created_at: createdAt,
+    source,
+  };
+}
+
+function dispatchSessionEvent(name, session) {
+  if (typeof window === "undefined") return;
+  window.dispatchEvent(new CustomEvent(name, { detail: session || null }));
+}
+
+function buildHeaders(extraHeaders = {}, options = {}) {
+  const hasJsonBody = options.hasBody && !options.isFormData;
+  return {
+    Accept: "application/json",
+    ...(hasJsonBody ? { "Content-Type": "application/json" } : {}),
+    ...(extraHeaders || {}),
+  };
+}
+
+async function parseApiResponse(response) {
   const payload = await response.json().catch(() => ({}));
   if (!response.ok) {
     throw new Error(payload?.message || "API request failed");
@@ -66,219 +148,78 @@ async function callLiveApi(path, options = {}) {
   return payload?.data || payload;
 }
 
-async function callCustomerApi(path, options = {}) {
+async function callPublicApi(path, options = {}) {
+  const response = await fetch(`${getApiBase()}${path}`, {
+    ...options,
+    headers: buildHeaders(options.headers, {
+      hasBody: Boolean(options.body),
+      isFormData: options.body instanceof FormData,
+    }),
+  });
+
+  return parseApiResponse(response);
+}
+
+function requireCustomerSession() {
   const session = getSession();
   if (!session?.session_token) {
     throw new Error("يجب تسجيل الدخول أولًا.");
   }
+  return session;
+}
 
-  const response = await fetch(`${API_BASE}${path}`, {
-    headers: getCustomerApiHeaders(options.headers || {}),
+async function callCustomerApi(path, options = {}) {
+  const session = requireCustomerSession();
+  const response = await fetch(`${getApiBase()}${path}`, {
     ...options,
+    headers: {
+      ...buildHeaders(options.headers, {
+        hasBody: Boolean(options.body),
+        isFormData: options.body instanceof FormData,
+      }),
+      Authorization: `Bearer ${session.session_token}`,
+    },
   });
 
-  const payload = await response.json().catch(() => ({}));
-  if (!response.ok) {
-    throw new Error(payload?.message || "Customer API request failed");
-  }
-  return payload?.data || payload;
-}
-
-function getOrders() {
-  return readJson(STORAGE_KEYS.orders, []);
-}
-
-function saveOrders(orders) {
-  writeJson(STORAGE_KEYS.orders, orders);
-}
-
-function calculateBreakdown(amount, serviceType) {
-  const baseFee = serviceType === "urgent" ? Math.max(45, amount * 0.07) : Math.max(25, amount * 0.05);
-  const vatAmount = baseFee * 0.15;
-  return {
-    invoice_amount: amount,
-    service_fee: Number(baseFee.toFixed(2)),
-    vat_amount: Number(vatAmount.toFixed(2)),
-    total_amount: Number((amount + baseFee + vatAmount).toFixed(2)),
-  };
-}
-
-function createTimeline(statusCode, message) {
-  return {
-    status_code: statusCode,
-    message,
-    at: new Date().toISOString(),
-  };
-}
-
-async function mockRequestOtp(input) {
-  const mobile = normalizeMobile(input.mobile);
-  const otpRequestId = generateId("otpreq");
-  const requests = readJson(STORAGE_KEYS.otpRequests, {});
-  requests[otpRequestId] = {
-    mobile,
-    code: DEMO_OTP_CODE,
-    created_at: new Date().toISOString(),
-  };
-  writeJson(STORAGE_KEYS.otpRequests, requests);
-  return {
-    otp_request_id: otpRequestId,
-    expires_in_seconds: 300,
-    channel: "sms",
-    mock_otp_code: DEMO_OTP_CODE,
-  };
-}
-
-async function mockVerifyOtp(input) {
-  const requests = readJson(STORAGE_KEYS.otpRequests, {});
-  const record = requests[input.otp_request_id];
-  const mobile = normalizeMobile(input.mobile);
-  if (!record || record.mobile !== mobile) {
-    throw new Error("طلب التحقق غير صالح");
-  }
-  if (String(input.otp_code || "").trim() !== record.code) {
-    throw new Error("رمز التحقق غير صحيح");
-  }
-
-  const session = {
-    customer_id: generateId("cust"),
-    customer_name: "عميل سدادي",
-    mobile,
-    session_token: generateId("sess"),
-    created_at: new Date().toISOString(),
-  };
-
-  writeJson(STORAGE_KEYS.session, session);
-  delete requests[input.otp_request_id];
-  writeJson(STORAGE_KEYS.otpRequests, requests);
-
-  return {
-    session,
-  };
-}
-
-async function mockCalculateQuote(input) {
-  const amount = toMoneyNumber(input.invoice_amount);
-  if (!amount || amount <= 0) {
-    throw new Error("مبلغ الفاتورة غير صالح");
-  }
-
-  return {
-    quote_id: generateId("quo"),
-    invoice_type: input.invoice_type,
-    service_type: input.service_type,
-    breakdown: calculateBreakdown(amount, input.service_type),
-  };
-}
-
-async function mockPrecreateOrder(input) {
-  const quote = input.quote_snapshot || {};
-  const publicOrderId = generateId("pord");
-  const orderId = generateId("ord");
-  const trackingNo = generateTrackingNo();
-  const createdAt = new Date().toISOString();
-
-  const order = {
-    order_id: orderId,
-    public_order_id: publicOrderId,
-    tracking_no: trackingNo,
-    invoice_type: input.invoice_type,
-    service_type: input.service_type,
-    customer_input: input.customer_input,
-    invoice_payload: input.invoice_payload,
-    quote_snapshot: quote,
-    status_code: "created",
-    status_label: "تم إنشاء الطلب",
-    created_at: createdAt,
-    updated_at: createdAt,
-    timeline: [
-      createTimeline("created", "تم استلام الطلب وإنشاء رقم تتبع أولي"),
-    ],
-    documents: (input.invoice_payload?.documents || []).map((document, index) => ({
-      document_id: generateId(`doc${index + 1}`),
-      name: document.name,
-      file_name: document.name,
-      status: "uploaded",
-    })),
-  };
-
-  const orders = getOrders();
-  orders.unshift(order);
-  saveOrders(orders);
-
-  return {
-    public_order_id: publicOrderId,
-    tracking_no: trackingNo,
-    quote_snapshot: quote,
-    next_action: "checkout",
-  };
-}
-
-async function mockCheckoutOrder(publicOrderId) {
-  const orders = getOrders();
-  const order = orders.find((item) => item.public_order_id === publicOrderId);
-  if (!order) {
-    throw new Error("تعذر العثور على الطلب");
-  }
-
-  order.status_code = "submitted";
-  order.status_label = "تم تأكيد الطلب";
-  order.updated_at = new Date().toISOString();
-  order.timeline.push(createTimeline("submitted", "تم تأكيد الطلب وإحالته إلى التشغيل"));
-  saveOrders(orders);
-
-  return {
-    public_order_id: order.public_order_id,
-    tracking_no: order.tracking_no,
-    checkout_url: `/thank-you?tracking_no=${encodeURIComponent(order.tracking_no)}&public_order_id=${encodeURIComponent(order.public_order_id)}`,
-  };
-}
-
-async function mockGetTracking(trackingNo) {
-  const orders = getOrders();
-  const query = String(trackingNo || "").trim();
-  const order = orders.find((item) => item.tracking_no === query || item.public_order_id === query || item.order_id === query);
-  if (!order) {
-    throw new Error("لم يتم العثور على الطلب");
-  }
-  return order;
+  return parseApiResponse(response);
 }
 
 export function isMockMode() {
-  return USE_MOCK_API;
+  return false;
 }
 
 export function getDemoOtpCode() {
-  return DEMO_OTP_CODE;
-}
-
-function getSallaCustomer() {
-  return window.SADADY_SALLA_CUSTOMER || {};
+  return "";
 }
 
 export function getSallaCustomerIdentity() {
-  return getSallaCustomer();
+  const session = getSession();
+  if (!session) return null;
+  return {
+    id: session.customer_id,
+    name: session.customer_name || session.name || "",
+    phone: session.mobile || "",
+    email: session.email || "",
+    source: session.source || "salla",
+  };
 }
 
 export function getSession() {
-  const sallaCustomer = getSallaCustomer();
-  if (sallaCustomer?.id) {
-    return {
-      customer_id: sallaCustomer.id,
-      customer_name: sallaCustomer.name || "عميل سدادي",
-      name: sallaCustomer.name || "عميل سدادي",
-      mobile: sallaCustomer.phone || "",
-      email: sallaCustomer.email || "",
-      session_token: sallaCustomer.id,
-      created_at: new Date().toISOString(),
-      source: "salla",
-    };
+  const sdkSession = getSallaSdkSessionCandidate();
+  if (sdkSession?.session_token) {
+    const stored = sanitizeSession(readJson(STORAGE_KEYS.session, null));
+    if (stored?.session_token !== sdkSession.session_token || stored?.customer_id !== sdkSession.customer_id) {
+      writeJson(STORAGE_KEYS.session, sdkSession);
+    }
+    return sdkSession;
   }
-  return readJson(STORAGE_KEYS.session, null);
+
+  return sanitizeSession(readJson(STORAGE_KEYS.session, null));
 }
 
 export function hasSallaSession() {
-  return Boolean(getSallaCustomer()?.id || getSession()?.source === "salla");
+  const session = getSession();
+  return Boolean(session?.source === "salla" || session?.session_token || session?.customer_id);
 }
 
 export function getSessionSummary() {
@@ -301,12 +242,12 @@ export function getSessionSummary() {
   const customerId = session.customer_id || "";
 
   return {
-    isSalla: session.source === "salla" || Boolean(customerId),
+    isSalla: hasSallaSession(),
     name,
     mobile,
     email,
     customerId,
-    label: customerId ? `مرتبطة بحساب سلة · ${name}` : `مرتبطة بحساب سلة · ${name}`,
+    label: `مرتبطة بحساب سلة · ${name}`,
     subtitle: mobile
       ? `سيتم استخدام الرقم ${mobile} لربط الطلبات والإشعارات والمستندات تلقائيًا.`
       : "سيتم ربط طلباتك وملخصاتك داخل سلة بحسابك الحالي تلقائيًا.",
@@ -315,27 +256,85 @@ export function getSessionSummary() {
 
 export function getCustomerApiHeaders(extraHeaders = {}) {
   const session = getSession();
-  const headers = {
-    Accept: "application/json",
-    "Content-Type": "application/json",
-    ...(extraHeaders || {}),
+  return {
+    ...buildHeaders(extraHeaders),
+    ...(session?.session_token ? { Authorization: `Bearer ${session.session_token}` } : {}),
   };
-
-  if (session?.session_token) {
-    headers.Authorization = `Bearer ${session.session_token}`;
-    headers["X-Sadady-Customer-Id"] = session.customer_id || "";
-    headers["X-Sadady-Customer-Phone"] = session.mobile || "";
-  }
-
-  return headers;
 }
 
 export function setSession(value) {
-  writeJson(STORAGE_KEYS.session, value);
+  const session = sanitizeSession(value);
+  if (!session) {
+    clearSession();
+    return null;
+  }
+
+  writeJson(STORAGE_KEYS.session, session);
+  dispatchSessionEvent("sadady:auth-success", session);
+  dispatchSessionEvent("sadady:auth-change", session);
+  return session;
 }
 
 export function clearSession() {
   removeValue(STORAGE_KEYS.session);
+  dispatchSessionEvent("sadady:auth-change", null);
+}
+
+function syncSessionFromSallaSdk() {
+  const sdkSession = getSallaSdkSessionCandidate();
+  if (!sdkSession?.session_token) return false;
+
+  const currentSession = sanitizeSession(readJson(STORAGE_KEYS.session, null));
+  const changed = currentSession?.session_token !== sdkSession.session_token || currentSession?.customer_id !== sdkSession.customer_id;
+  writeJson(STORAGE_KEYS.session, sdkSession);
+  if (changed) {
+    dispatchSessionEvent("sadady:auth-success", sdkSession);
+    dispatchSessionEvent("sadady:auth-change", sdkSession);
+  }
+  return true;
+}
+
+function scheduleSallaSessionSync(attempt = 0) {
+  if (syncSessionFromSallaSdk()) return;
+  if (attempt >= SESSION_SYNC_ATTEMPTS) return;
+  window.setTimeout(() => scheduleSallaSessionSync(attempt + 1), SESSION_SYNC_DELAY_MS);
+}
+
+function registerSallaAuthListeners() {
+  const sdk = getSallaSdk();
+  if (!sdk?.event?.auth) return false;
+
+  try {
+    if (typeof sdk.event.auth.onVerified === "function") {
+      sdk.event.auth.onVerified(() => {
+        window.setTimeout(syncSessionFromSallaSdk, 0);
+      });
+    }
+    if (typeof sdk.event.auth.onRefreshed === "function") {
+      sdk.event.auth.onRefreshed(() => {
+        window.setTimeout(syncSessionFromSallaSdk, 0);
+      });
+    }
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+if (typeof window !== "undefined") {
+  registerSallaAuthListeners();
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", () => {
+      registerSallaAuthListeners();
+      scheduleSallaSessionSync();
+    }, { once: true });
+  } else {
+    scheduleSallaSessionSync();
+  }
+  window.addEventListener("load", () => {
+    registerSallaAuthListeners();
+    scheduleSallaSessionSync();
+  });
 }
 
 export function getPendingJourney() {
@@ -362,31 +361,23 @@ export function clearCurrentJourney() {
   removeValue(STORAGE_KEYS.currentJourney);
 }
 
-export async function requestOtp(input) {
-  if (USE_MOCK_API) return mockRequestOtp(input);
+export async function requestOtp() {
   throw new Error("التحقق يتم عبر سلة. يرجى تسجيل الدخول من حساب سلة أولًا.");
 }
 
-export async function verifyOtp(input) {
-  const response = USE_MOCK_API ? await mockVerifyOtp(input) : null;
-  if (response?.session) {
-    setSession(response.session);
-    return response;
-  }
+export async function verifyOtp() {
   throw new Error("التحقق يتم عبر سلة. لا يمكن استخدام OTP يدوي هنا.");
 }
 
 export async function calculateQuote(input) {
-  if (USE_MOCK_API) return mockCalculateQuote(input);
-  return callLiveApi("/api/v1/public/quotes/calculate", {
+  return callPublicApi("/api/v1/public/quotes/calculate", {
     method: "POST",
     body: JSON.stringify(input),
   });
 }
 
 export async function precreateOrder(input) {
-  if (USE_MOCK_API) return mockPrecreateOrder(input);
-  return callLiveApi("/api/v1/public/orders/precreate", {
+  return callPublicApi("/api/v1/public/orders/precreate", {
     method: "POST",
     body: JSON.stringify(input),
     headers: { "X-Idempotency-Key": generateId("idem") },
@@ -394,8 +385,7 @@ export async function precreateOrder(input) {
 }
 
 export async function checkoutOrder(publicOrderId, input = {}) {
-  if (USE_MOCK_API) return mockCheckoutOrder(publicOrderId, input);
-  return callLiveApi(`/api/v1/public/orders/${publicOrderId}/checkout`, {
+  return callPublicApi(`/api/v1/public/orders/${publicOrderId}/checkout`, {
     method: "POST",
     body: JSON.stringify(input),
     headers: { "X-Idempotency-Key": generateId("idem") },
@@ -403,21 +393,28 @@ export async function checkoutOrder(publicOrderId, input = {}) {
 }
 
 export async function getTracking(trackingNo) {
-  if (USE_MOCK_API) return mockGetTracking(trackingNo);
-  return callLiveApi(`/api/v1/public/orders/${encodeURIComponent(trackingNo)}`, {
+  return callPublicApi(`/api/v1/public/orders/${encodeURIComponent(trackingNo)}`, {
     method: "GET",
   });
 }
 
 export async function getCustomerProfile() {
-  const session = getSession();
+  const session = requireCustomerSession();
+  if (!session.mobile) {
+    throw new Error("تعذر تحديد رقم الجوال المرتبط بالحساب.");
+  }
+
   return callCustomerApi(`/api/customer/${encodeURIComponent(session.mobile)}/profile`, {
     method: "GET",
   });
 }
 
 export async function getCustomerOrders() {
-  const session = getSession();
+  const session = requireCustomerSession();
+  if (!session.mobile) {
+    throw new Error("تعذر تحديد رقم الجوال المرتبط بالحساب.");
+  }
+
   return callCustomerApi(`/api/customer/${encodeURIComponent(session.mobile)}/orders`, {
     method: "GET",
   });
@@ -436,7 +433,11 @@ export async function getCustomerOrderDocuments(orderId) {
 }
 
 export async function getCustomerNotifications() {
-  const session = getSession();
+  const session = requireCustomerSession();
+  if (!session.mobile) {
+    throw new Error("تعذر تحديد رقم الجوال المرتبط بالحساب.");
+  }
+
   return callCustomerApi(`/api/customer/${encodeURIComponent(session.mobile)}/notifications`, {
     method: "GET",
   });

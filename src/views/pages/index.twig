@@ -1,6 +1,6 @@
 {% extends "layouts/landing.twig" %}
 
-{% block title %}Sadady Main Site{% endblock %}
+{% block title %}سدادي{% endblock %}
 
 {% block landing_content %}
   {% include "components/sadady/home/hero-banner.twig" %}
@@ -10,6 +10,7 @@
 {% endblock %}
 
 {% block scripts %}
-    <script type="module" src="{{ 'js/sadady/quote-flow.js' | asset }}"></script>
+  <script type="module" src="{{ 'js/sadady/live-home.js' | asset }}"></script>
+  <script type="module" src="{{ 'js/sadady/quote-flow.js' | asset }}"></script>
   <script type="module" src="{{ 'js/sadady/checkout-flow.js' | asset }}"></script>
 {% endblock %}

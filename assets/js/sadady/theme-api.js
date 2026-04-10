@@ -1,5 +1,7 @@
 const DEFAULT_API_BASE = "https://api.sadady.com";
-const API_BASE = window.SADADY_API_BASE || "";
+const META_API_BASE = readMetaContent("sadady-api-base");
+const META_SUPPORT_EMAIL = readMetaContent("sadady-support-email");
+const API_BASE = window.SADADY_API_BASE || META_API_BASE || "";
 const THEME_ENDPOINT = `${API_BASE || DEFAULT_API_BASE}/api/v1/public/theme-config`;
 
 const defaults = {
@@ -12,7 +14,7 @@ const defaults = {
   api_base_url: API_BASE || "https://api.sadady.com",
   home_url: "/",
   support_phone: "966500000000",
-  support_email: "care@sadady.com",
+  support_email: META_SUPPORT_EMAIL || "care@sadady.com",
   primary_color: "#f97316",
   primary_color_alt: "#fb923c",
   success_color: "#10b981",
@@ -21,14 +23,32 @@ const defaults = {
   surface_end: "#fffaf5",
 };
 
+function readMetaContent(name) {
+  return document.querySelector(`meta[name="${name}"]`)?.getAttribute("content")?.trim() || "";
+}
+
 function setText(key, value) {
   document.querySelectorAll(`[data-theme-text="${key}"]`).forEach((node) => {
     if (key === "hero_title") {
-      node.innerHTML = value;
+      setMultilineText(node, value);
       return;
     }
     node.textContent = value;
   });
+}
+
+function setMultilineText(node, value) {
+  const parts = String(value || "").split(/<br\s*\/?>/i);
+  const fragment = document.createDocumentFragment();
+
+  parts.forEach((part, index) => {
+    if (index > 0) {
+      fragment.appendChild(document.createElement("br"));
+    }
+    fragment.appendChild(document.createTextNode(part));
+  });
+
+  node.replaceChildren(fragment);
 }
 
 function setImage(key, value) {

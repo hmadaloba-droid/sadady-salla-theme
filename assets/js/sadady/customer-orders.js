@@ -341,6 +341,8 @@ async function loadProfilePage() {
 }
 
 renderSessionStrip();
+window.addEventListener("sadady:auth-success", renderSessionStrip);
+window.addEventListener("sadady:auth-change", renderSessionStrip);
 
 if (document.getElementById("customerOrdersList")) {
   loadOrdersPage();
