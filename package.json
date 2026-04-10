@@ -6,6 +6,8 @@
   "scripts": {
     "validate": "node ./scripts/validate-theme.mjs",
     "lint": "npm run validate",
+    "development": "node -e \"require('fs').mkdirSync('public', { recursive: true }); console.log('Sadady theme development bootstrap ready');\"",
+    "watch": "node -e \"console.log('Sadady theme watch bootstrap ready');\"",
     "build": "npm run validate",
     "preview": "npm run validate"
   }
