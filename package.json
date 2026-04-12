@@ -8,8 +8,8 @@
     "release:check": "node ./scripts/validate-release.mjs",
     "salla:reset-state": "node ./scripts/reset-salla-cli-state.mjs",
     "lint": "npm run validate",
-    "development": "node -e \"require('fs').mkdirSync('public', { recursive: true }); console.log('Sadady theme development bootstrap ready');\"",
-    "watch": "node -e \"console.log('Sadady theme watch bootstrap ready');\"",
+    "development": "node ./scripts/prepare-preview-assets.mjs",
+    "watch": "node ./scripts/prepare-preview-assets.mjs",
     "build": "npm run validate && npm run release:check",
     "preview": "npm run validate"
   }

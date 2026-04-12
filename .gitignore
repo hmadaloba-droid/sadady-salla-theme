@@ -9,3 +9,7 @@ pnpm-lock.yaml
 preview-live*.log
 preview*.html
 preview*.txt
+public/css/
+public/js/
+public/images/
+public/index.html
