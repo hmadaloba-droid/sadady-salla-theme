@@ -10,6 +10,8 @@ const requiredFiles = [
   "theme-config-contract.md",
   "theme-config.example.json",
   "twilight.json",
+  "scripts/validate-release.mjs",
+  "scripts/reset-salla-cli-state.mjs",
   "src/locales/ar.json",
   "src/locales/en.json",
   "assets/js/sadady/theme-api.js",
@@ -50,7 +52,7 @@ const requiredSnippets = [
   },
   {
     file: "assets/js/sadady/api-client.js",
-    snippets: ["DEFAULT_API_BASE", "Authorization", "getSallaSdkSessionCandidate", "api/v1/public/quotes/calculate", "api/v1/public/orders/precreate"],
+    snippets: ["DEFAULT_API_BASE", "Authorization", "getSallaSdkIdentityCandidate", "api/v1/public/quotes/calculate", "api/v1/public/orders/precreate", "/api/v1/public/auth/salla/exchange"],
   },
   {
     file: "assets/js/sadady/session-strip.js",

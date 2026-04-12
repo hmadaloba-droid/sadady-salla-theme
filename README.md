@@ -14,6 +14,7 @@
 - تشغيل مسار الطلب والتتبع وصفحات العميل داخل سلة
 - الاعتماد على الباك إند كمصدر الحقيقة
 - منع حقن بيانات العميل الحساسة داخل Twig أو JavaScript inline
+- فصل هوية سلة عن جلسة سدادي الداخلية عبر exchange endpoint آمن نسبيًا
 
 ## أهم الملفات
 
@@ -42,9 +43,26 @@
 
 ```bash
 npm run validate
+npm run release:check
 ```
 
 هذا الفحص يتأكد من وجود الملفات الأساسية وربط السكربتات والمقاطع الحساسة المطلوبة للنسخة الحالية.
+
+## عقد المصادقة الحالي
+
+- الثيم يقرأ هوية العميل من Twilight JS SDK فقط.
+- عند أول طلب إلى صفحات العميل، ينفذ exchange إلى:
+
+```text
+/api/v1/public/auth/salla/exchange
+```
+
+- الخادم يتحقق من العميل عبر Salla Admin API ثم يصدر جلسة Sadady داخلية.
+- بعد ذلك فقط تُستخدم جلسة Sadady الداخلية للوصول إلى:
+
+```text
+/api/customer/*
+```
 
 ## التشغيل عبر Salla CLI
 
@@ -75,7 +93,13 @@ salla theme create
 salla store list
 ```
 
-4. شغّل المعاينة من جذر الثيم:
+4. قبل أي معاينة جديدة نظّف حالة الـ draft المحلية إذا ظهرت لك حالة ربط قديمة:
+
+```bash
+npm run salla:reset-state
+```
+
+5. شغّل المعاينة من جذر الثيم:
 
 ```bash
 salla theme preview --store=<demo_store> --with-editor --browser=chrome
@@ -84,7 +108,8 @@ salla theme preview --store=<demo_store> --with-editor --browser=chrome
 ملاحظات:
 
 - هذا الثيم يعتمد `Static Home`، لذلك من الطبيعي أن تظهر رسالة عدم وجود عناصر Home قابلة للتخصيص داخل المحرر.
-- إذا ظهرت معاينة الثيم الافتراضي بدل واجهة سدادي، فهذه مشكلة مزامنة draft داخل سلة وليست مشكلة في ملفات GitHub نفسها.
+- إذا ظهرت معاينة قديمة أو draft غير متوقع، امسح `node_modules/.salla-cli` عبر `npm run salla:reset-state` ثم أعد `preview`.
+- النشر يعتمد الآن سياسة إصدار موحدة: `package.json` و`twilight.json` وGit tag التالي يجب أن يحملوا نفس النسخة.
 
 ## ملاحظات
 

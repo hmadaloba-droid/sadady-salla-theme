@@ -31,12 +31,21 @@ salla store list
 salla theme preview --store=<demo_store> --with-editor --browser=chrome
 ```
 
+إذا ظهرت لك حالة draft قديمة أو preview لا ينعكس عليها آخر commit:
+
+```bash
+npm run salla:reset-state
+```
+
+ثم أعد الأمر السابق.
+
 ## قبل الرفع
 
 1. شغّل فحص الثيم:
 
 ```bash
 npm run validate
+npm run release:check
 ```
 
 2. تأكد من ضبط `theme-config`:
@@ -74,7 +83,8 @@ npm run validate
 
 - تأكد أن الفرع المختار في الشركاء هو `main`
 - تأكد أن الثيم تم استيراده من المستودع الصحيح
-- اعتبر ذلك مشكلة مزامنة draft داخل سلة إذا كانت ملفات GitHub صحيحة والـ CLI تمكن من إنشاء الثيم
+- نظّف حالة `node_modules/.salla-cli`
+- أعد `preview` قبل اعتبارها مشكلة من Salla نفسها
 
 ## بعد التفعيل
 
@@ -93,6 +103,7 @@ npm run validate
 ## Checklist
 
 - [ ] `npm run validate` نجح
+- [ ] `npm run release:check` نجح
 - [ ] `theme-config` متاح أو fallback الافتراضي يعمل
 - [ ] الصفحة الرئيسية سليمة
 - [ ] التتبع يعمل
