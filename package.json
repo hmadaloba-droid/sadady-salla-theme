@@ -11,6 +11,7 @@
     "development": "node ./scripts/prepare-preview-assets.mjs",
     "watch": "node ./scripts/prepare-preview-assets.mjs",
     "build": "npm run validate && npm run release:check",
+    "prod": "npm run build",
     "preview": "npm run validate"
   }
 }

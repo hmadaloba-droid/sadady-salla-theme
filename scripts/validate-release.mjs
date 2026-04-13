@@ -28,6 +28,11 @@ const pkg = readJson("package.json");
 const twilight = readJson("twilight.json");
 const failures = [];
 const warnings = [];
+const gitDir = resolve(themeRoot, ".git");
+
+if (!existsSync(gitDir)) {
+  failures.push("Theme git metadata (.git) is missing. Release preview/publish must run from the original git-linked workspace.");
+}
 
 if (!/^\d+\.\d+\.\d+$/.test(String(pkg.version || ""))) {
   failures.push(`package.json version is not semver: ${pkg.version || "<empty>"}`);
@@ -38,8 +43,10 @@ if (pkg.version !== twilight.version) {
 }
 
 const originUrl = run("git config --get remote.origin.url", { allowFailure: true });
-if (originUrl && twilight.repository && !originUrl.includes("sadady-salla-theme")) {
-  warnings.push(`Git origin (${originUrl}) does not look aligned with twilight repository (${twilight.repository}).`);
+if (!originUrl) {
+  failures.push("Git origin remote is missing. Release checks must run from the linked Salla theme repository.");
+} else if (twilight.repository && !originUrl.includes("sadady-salla-theme")) {
+  failures.push(`Git origin (${originUrl}) does not look aligned with twilight repository (${twilight.repository}).`);
 }
 
 const localTag = run(`git tag -l ${pkg.version}`, { allowFailure: true });
