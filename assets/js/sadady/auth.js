@@ -1,24 +1,16 @@
-import { getSession, getSessionSummary } from "./api-client.js";
+import { getSession } from "./api-client.js";
 
 const goToCustomerBtn = document.getElementById("goToCustomerBtn");
-const loginHint = document.getElementById("loginHint");
 
 const CUSTOMER_ORDERS_URL = "/customer/orders";
 const CUSTOMER_LOGIN_URL = "/customer/login";
 
 function syncCustomerButton() {
   const session = getSession();
-  const summary = getSessionSummary();
 
   if (goToCustomerBtn) {
-    goToCustomerBtn.textContent = session ? "طلباتي" : "الدخول إلى سلة";
+    goToCustomerBtn.textContent = session ? "طلباتي" : "تسجيل الدخول";
     goToCustomerBtn.dataset.sessionState = session ? "connected" : "disconnected";
-  }
-
-  if (loginHint) {
-    loginHint.textContent = session
-      ? summary.subtitle
-      : "الدخول يتم عبر حساب سلة، وبعدها تظهر طلباتك ومستنداتك تلقائيًا.";
   }
 }
 

@@ -107,13 +107,6 @@ input {
   flex-wrap: wrap;
 }
 
-.login-hint {
-  max-width: 260px;
-  font-size: 12px;
-  line-height: 1.75;
-  color: var(--muted);
-}
-
 .nav-links {
   display: flex;
   align-items: center;

@@ -8,7 +8,6 @@ function syncSessionWidget(root = document) {
   const nameNodes = root.querySelectorAll("[data-sadady-session-name]");
   const phoneNodes = root.querySelectorAll("[data-sadady-session-phone]");
   const idNodes = root.querySelectorAll("[data-sadady-session-id]");
-  const loginHint = document.getElementById("loginHint");
 
   if (strip) {
     strip.dataset.sessionState = summary.isSalla ? "connected" : "disconnected";
@@ -33,12 +32,6 @@ function syncSessionWidget(root = document) {
   idNodes.forEach((node) => {
     node.textContent = summary.customerId || "هوية سلة";
   });
-
-  if (loginHint) {
-    loginHint.textContent = summary.isSalla
-      ? summary.subtitle
-      : "الدخول يتم عبر حساب سلة، وبعدها تظهر الطلبات والمستندات المرتبطة بحسابك تلقائيًا.";
-  }
 }
 
 function bindScrollCta() {

@@ -32,7 +32,7 @@ const requiredFiles = [
 const requiredSnippets = [
   {
     file: "src/views/layouts/master.twig",
-    snippets: ["js/sadady/theme-api.js", "js/sadady/auth.js", "js/sadady/session-strip.js", "body:classes", "sadady-api-base"],
+    snippets: ["js/sadady/theme-api.js", "js/sadady/auth.js", "body:classes", "sadady-api-base"],
   },
   {
     file: "src/views/pages/index.twig",
@@ -53,10 +53,6 @@ const requiredSnippets = [
   {
     file: "assets/js/sadady/api-client.js",
     snippets: ["DEFAULT_API_BASE", "Authorization", "getSallaSdkIdentityCandidate", "api/v1/public/quotes/calculate", "api/v1/public/orders/precreate", "/api/v1/public/auth/salla/exchange"],
-  },
-  {
-    file: "assets/js/sadady/session-strip.js",
-    snippets: ["getSessionSummary", "sadady:auth-success"],
   },
 ];
 
