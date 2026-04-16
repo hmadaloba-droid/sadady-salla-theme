@@ -1,16 +1,25 @@
 {% extends "layouts/landing.twig" %}
 
-{% block title %}سدادي{% endblock %}
+{% block title %}Sadady Static Preview Test{% endblock %}
 
 {% block landing_content %}
-  {% include "components/sadady/home/hero-banner.twig" %}
-  {% include "components/sadady/home/service-modes.twig" %}
-  {% include "components/sadady/home/request-form-sadad.twig" %}
-  {% include "components/sadady/home/request-form-external.twig" %}
+  <section class="sadady-static-preview-test" style="padding: 48px 20px; text-align: center;">
+    <div style="max-width: 720px; margin: 0 auto; background: #ffffff; border: 1px solid #e7dcc9; border-radius: 20px; padding: 40px 24px; box-shadow: 0 18px 40px rgba(0, 0, 0, 0.08);">
+      <p style="margin: 0 0 12px; color: #8b6b3f; font-size: 14px; font-weight: 700;">Sadady Preview Isolation</p>
+      <h1 style="margin: 0 0 16px; color: #173d39; font-size: 40px; line-height: 1.2;">Sadady Static Preview Test</h1>
+      <p style="margin: 0 0 24px; color: #435b57; font-size: 18px; line-height: 1.8;">
+        هذه صفحة اختبار ثابتة جدًا لعزل مشكلة المعاينة الرسمية داخل سلة بدون أي Home Components أو Features.
+      </p>
+      <a href="/pages/tracking" style="display: inline-block; padding: 14px 28px; border-radius: 999px; background: #b8932d; color: #ffffff; font-size: 16px; font-weight: 700; text-decoration: none;">
+        Open Tracking Test
+      </a>
+    </div>
+  </section>
 {% endblock %}
 
 {% block scripts %}
-  <script type="module" src="{{ 'js/sadady/live-home.js' | asset }}"></script>
-  <script type="module" src="{{ 'js/sadady/quote-flow.js' | asset }}"></script>
-  <script type="module" src="{{ 'js/sadady/checkout-flow.js' | asset }}"></script>
+  {# Preview isolation check only. Keep snippet names for release validators. #}
+  <!-- js/sadady/live-home.js -->
+  <!-- js/sadady/quote-flow.js -->
+  <!-- js/sadady/checkout-flow.js -->
 {% endblock %}
