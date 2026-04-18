@@ -47,6 +47,13 @@ for (const dir of assetDirs) {
   copyDirectory(source, target);
 }
 
+// Salla's preview shell preloads these root assets even when our theme
+// does not author them directly. Providing harmless placeholders keeps the
+// official preview console clean and avoids misleading MIME/404 noise.
+writeFileSync(path.join(publicRoot, 'app.css'), '', 'utf8');
+writeFileSync(path.join(publicRoot, 'app.js'), 'export {};\n', 'utf8');
+writeFileSync(path.join(publicRoot, 'product-card.js'), 'export {};\n', 'utf8');
+
 writeFileSync(
   path.join(publicRoot, 'index.html'),
   [

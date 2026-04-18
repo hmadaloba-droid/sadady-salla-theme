@@ -111,6 +111,26 @@ salla theme preview --store=<demo_store> --with-editor --browser=chrome
 - إذا ظهرت معاينة قديمة أو draft غير متوقع، امسح `node_modules/.salla-cli` عبر `npm run salla:reset-state` ثم أعد `preview`.
 - النشر يعتمد الآن سياسة إصدار موحدة: `package.json` و`twilight.json` وGit tag التالي يجب أن يحملوا نفس النسخة.
 
+## ملاحظة مهمة بخصوص Preview الرسمي
+
+عند فتح `Theme Preview` من سلة، قد يحمّل المحرر الصفحة داخل نطاق آمن مثل `https://salla.design`
+ثم يحاول جلب الأصول من `http://localhost:8000`. بعض إصدارات Chrome الحديثة تمنع هذا
+افتراضيًا بسبب قيود `Private Network Access / loopback`.
+
+إذا ظهر HTML الصفحة بدون CSS/JS أو ظهرت الصفحة خام داخل Preview الرسمي، فهذا ليس بالضرورة
+عطلًا في الثيم. في هذه الحالة:
+
+1. اترك `salla theme preview` يعمل محليًا.
+2. افتح رابط الـ preview الرسمي باستخدام سكربت المتصفح المرفق:
+
+```bash
+npm run preview:open -- "https://s.salla.sa/themes/editor/draft-<draft_id>?assets_url=http://localhost:8000&legacy=0&with_editor=true&ws_port=8001"
+```
+
+هذا السكربت يشغّل Chrome بخصائص متوافقة مع معاينة سدادي الرسمية حتى تُحمّل الأصول المحلية
+بشكل صحيح داخل محرر سلة. افتراضيًا يستخدم جلسة Chrome الحالية حتى تبقى حالة تسجيل
+الدخول في سلة كما هي. وإذا احتجت بروفايلًا معزولًا، مرر `-ProfileDir` يدويًا.
+
 ## ملاحظات
 
 - مجلد `src/locales` موجود الآن كبداية بسيطة ويمكن توسيعه لاحقًا.

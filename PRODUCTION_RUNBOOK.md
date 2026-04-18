@@ -39,6 +39,18 @@ npm run salla:reset-state
 
 ثم أعد الأمر السابق.
 
+إذا ظهرت الصفحة داخل Preview الرسمي بشكل خام أو بدون CSS/JS رغم أن HTML يظهر:
+
+1. أبقِ أمر `salla theme preview` شغالًا.
+2. افتح رابط الـ draft نفسه عبر:
+
+```bash
+npm run preview:open -- "https://s.salla.sa/themes/editor/draft-<draft_id>?assets_url=http://localhost:8000&legacy=0&with_editor=true&ws_port=8001"
+```
+
+هذا يعالج حجب Chrome الحديث لتحميل أصول `localhost` من داخل نطاق معاينة سلة.
+السكربت يستخدم جلسة Chrome الحالية افتراضيًا حتى لا تفقد تسجيل دخول الشركاء.
+
 ## قبل الرفع
 
 1. شغّل فحص الثيم:

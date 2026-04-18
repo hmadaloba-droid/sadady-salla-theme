@@ -13,4 +13,7 @@ public/css/
 public/js/
 public/images/
 public/index.html
+public/app.css
+public/app.js
+public/product-card.js
 .preview-runtime/
