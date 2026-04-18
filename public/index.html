@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f97316">
+  <meta name="sadady-api-base" content="https://api.sadady.com">
+  <meta name="sadady-support-email" content="support@sadady.com">
+  <title>Sadady Preview</title>
+  <link rel="icon" href="/images/favicon.svg">
+  <link rel="stylesheet" href="/css/sadady-home.css">
+  <link rel="stylesheet" href="/css/sadady-journey.css">
+</head>
+<body id="top" class="sadady-theme">
+  <div class="container">
+    <header class="header">
+      <div class="header-inner">
+        <div class="brand">
+          <a class="brand-link" href="/" aria-label="الرئيسية">
+            <img class="brand-logo" src="/images/logo-default.svg" alt="Sadady" hidden>
+            <div>
+              <div class="logo-text">Sadady</div>
+              <div class="brand-sub">منصة سداد وتقسيط الفواتير</div>
+            </div>
+          </a>
+        </div>
+        <nav class="nav" id="mainNav">
+          <div class="nav-links">
+            <a href="#top">من نحن</a>
+            <a href="#request">كيف تعمل الخدمة</a>
+            <a href="#policy">تواصل معنا</a>
+            <a href="#policy">السياسة</a>
+          </div>
+          <div class="nav-actions">
+            <button class="lang-btn" type="button">EN</button>
+            <button id="goToCustomerBtn" class="btn btn-login" type="button">تسجيل الدخول</button>
+          </div>
+        </nav>
+      </div>
+    </header>
+    <section class="hero">
+      <div class="hero-box">
+        <div class="hero-grid">
+          <div>
+            <h1 data-theme-text="hero_title">سدادي تسدد عنك فواتير سداد فورًا<br>وأنت قسّطها على راحتك</h1>
+            <p data-theme-text="hero_subtitle">أدخل رقم فاتورة سداد… ونحن نسددها فورًا وأنت تقسطها براحتك.</p>
+            <div class="chips">
+              <span class="chip">⚡ الكهرباء</span>
+              <span class="chip">📶 الاتصالات</span>
+              <span class="chip">💧 المياه</span>
+              <span class="chip">✈️ الطيران</span>
+              <span class="chip">🏛️ حكومي</span>
+              <span class="chip">🏫 المدارس</span>
+              <span class="chip">🏥 المستشفيات</span>
+              <span class="chip">📄 الإيجارات</span>
+              <span class="chip">🏗️ المقاولات</span>
+            </div>
+            <div class="hero-actions">
+              <button class="btn btn-orange" type="button" onclick="document.getElementById('request').scrollIntoView({behavior:'smooth'})">💳 قسط مدفوعات سداد الآن</button>
+              <button class="btn btn-orange" type="button" onclick="document.getElementById('otherRequest').scrollIntoView({behavior:'smooth'})">🧾 تقسيط فواتير أخرى خارج سداد</button>
+            </div>
+            <div class="providers-wrap">
+              <div class="providers-row">
+                <div class="provider-tabby">tabby</div>
+                <div class="provider-tamara">تمارا</div>
+                <div class="provider-mispay">MIS<span class="provider-mispay-accent">pay</span></div>
+                <div class="provider-madfu">مدفوع</div>
+                <div class="provider-emkan"><div class="icon">⌘</div><div><div class="title">إمكان</div><div class="sub">Pay Later</div></div></div>
+              </div>
+            </div>
+          </div>
+          <div class="mobile-preview">
+            <div class="phone">
+              <div class="phone-top"><span>9:41</span><span>سدادي</span></div>
+              <div class="phone-card">
+                <div class="phone-icon">⚡</div>
+                <h3>منصة سدادي<br>سددت عنك فاتورة<br>الكهرباء الآن</h3>
+                <div class="phone-grid">
+                  <div class="mini-card"><div class="mini-label">اسم الخدمة</div><div class="mini-value">الكهرباء</div></div>
+                  <div class="mini-card"><div class="mini-label">إجمالي الفاتورة</div><div class="mini-value">299 ريال</div></div>
+                </div>
+                <button class="success-wide" type="button">✔ تم السداد بنجاح</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    <section class="services">
+      <div class="service-card fast">
+        <div class="service-head"><div class="service-icon">⚡</div><div class="service-badge">خدمة فورية</div></div>
+        <h3>تقسيط مدفوعات سداد خلال 15 دقيقة</h3>
+        <p>خدمة فورية لتقسيط مدفوعات سداد للحالات المستعجلة.</p>
+        <button class="full-btn" type="button" data-scroll-target="#request">ابدأ التقسيط الآن</button>
+      </div>
+      <div class="service-card hours">
+        <div class="service-head"><div class="service-icon">⏰</div><div class="service-badge">خدمة اقتصادية</div></div>
+        <h3>تقسيط مدفوعات سداد خلال ساعات العمل</h3>
+        <p>خدمة اقتصادية لتنفيذ طلب تقسيط مدفوعات سداد خلال ساعات العمل.</p>
+        <button class="full-btn" type="button" data-scroll-target="#request">ابدأ التقسيط الآن</button>
+      </div>
+    </section>
+    <section id="request" class="request-box">
+      <h2>طلب تقسيط مدفوعات سداد</h2>
+      <div class="form-grid">
+        <div class="field"><label>اسم الشركة المفوترة</label><input id="sadadBillerName" placeholder="مثال: شركة الكهرباء"></div>
+        <div class="field full"><label>بيانات السداد</label><div class="form-grid"><input id="sadadBillerCode" placeholder="رمز المفوتر"><input id="sadadBillNumber" placeholder="رقم (الفاتورة / الاشتراك / المفوترة)"></div></div>
+        <div class="field"><input id="sadadIdentity" placeholder="رقم الهوية / رقم الإقامة / رقم السجل التجاري / التاريخ (إن طُلب)"></div>
+        <div class="field"><input id="sadadNote" placeholder="ملاحظة (اختياري)"></div>
+        <div class="field full"><label>مبلغ فاتورة السداد</label><input id="sadadInvoiceAmount" placeholder="مبلغ فاتورة السداد (مثال: 250 ريال)"></div>
+      </div>
+      <div class="notice"><strong>ملاحظة:</strong> بعض الجهات قد تطلب بيانات إضافية مثل رقم الهوية أو السجل التجاري أو التاريخ حسب نوع الفاتورة.</div>
+      <label class="upload-box" for="sadadInvoiceFile"><div class="upload-icon">📄</div><div class="upload-title">اضغط هنا لرفع الفاتورة</div><div class="upload-subtitle">PDF / JPG / PNG</div><div id="sadadUploadFileName" class="upload-file"></div><input id="sadadInvoiceFile" type="file" accept=".pdf,.jpg,.jpeg,.png"></label>
+      <div class="speed-section"><label class="speed-label">اختر طريقة سداد الفاتورة</label><div class="speed-grid"><label class="speed-option hours"><input type="radio" name="speed" value="خلال ساعات العمل" checked><div class="speed-option-title">خلال ساعات العمل</div><div class="speed-option-caption">تنفيذ الطلب خلال ساعات العمل الرسمية.</div></label><label class="speed-option fast"><input type="radio" name="speed" value="خلال 15 دقيقة"><div class="speed-option-title">خلال 15 دقيقة</div><div class="speed-option-caption">خيار سريع للحالات المستعجلة.</div></label></div></div>
+      <div class="submit-area"><button id="sadadSubmitBtn" class="btn btn-green submit-btn-wide" type="button">ابدأ التقسيط الآن</button></div>
+      <div id="sadadFeedback" class="form-feedback" hidden></div>
+    </section>
+    <div class="section-divider"><span>فواتير أخرى خارج سداد</span></div>
+    <section id="otherRequest" class="request-box external-request-box">
+      <h2>طلب تقسيط فواتير أخرى</h2>
+      <p class="section-lead">خدمة مخصصة لدفع وتقسيط الفواتير الأخرى خارج سداد، مع تحويل المبلغ للمستفيد بعد مراجعة الطلب.</p>
+      <div class="form-grid">
+        <div class="field"><label>اسم المستفيد</label><input id="otherBeneficiaryName" placeholder="اكتب اسم المستفيد"></div>
+        <div class="field"><label>مبلغ الفاتورة</label><input id="otherInvoiceAmount" placeholder="مثال: 1500 ريال"></div>
+        <div class="field"><label>هاتف المستفيد</label><input id="otherBeneficiaryPhone" placeholder="05xxxxxxxx"></div>
+        <div class="field"><label>آيبان المستفيد</label><input id="otherIban" placeholder="SA00 0000 0000 0000 0000 0000"></div>
+      </div>
+      <label class="upload-box" for="otherInvoiceFile"><div class="upload-icon">🧾</div><div class="upload-title">اضغط هنا لرفع الفاتورة</div><div class="upload-subtitle">PDF / JPG / PNG</div><div id="otherUploadFileName" class="upload-file"></div><input id="otherInvoiceFile" type="file" accept=".pdf,.jpg,.jpeg,.png"></label>
+      <div class="speed-section"><label class="speed-label">اختر سرعة تنفيذ الطلب</label><div class="speed-grid"><label class="speed-option hours"><input type="radio" name="otherSpeedChoice" value="خلال ساعات العمل" checked><div class="speed-option-title">خلال ساعات العمل</div><div class="speed-option-caption">تنفيذ الطلب خلال ساعات العمل الرسمية.</div></label><label class="speed-option fast"><input type="radio" name="otherSpeedChoice" value="خلال 15 دقيقة"><div class="speed-option-title">خلال 15 دقيقة</div><div class="speed-option-caption">خيار سريع للحالات المستعجلة.</div></label></div></div>
+      <div class="submit-area"><button id="otherSubmitBtn" class="btn btn-green submit-btn-wide" type="button">ابدأ التقسيط الآن</button></div>
+      <div id="otherFeedback" class="form-feedback" hidden></div>
+    </section>
+    <footer class="footer" id="policy">
+      <div class="footer-inner">
+        <div class="footer-meta"><strong>Sadady</strong><span>منصة سداد وتقسيط الفواتير</span></div>
+        <div class="footer-links"><a href="#top">من نحن</a><a href="#policy">السياسة</a><a href="#policy">تواصل معنا</a></div>
+      </div>
+    </footer>
+  </div>
+  <div id="requestFlowModal" class="flow-modal" hidden>
+    <div class="flow-box">
+      <div class="summary-header"><h2 class="summary-page-title">ملخص الطلب</h2><button class="summary-back" id="backFlowBtn" type="button">←</button></div>
+      <p class="summary-intro">بعد المراجعة النهائية سيُحفظ الطلب داخل حساب سلة ثم تنتقل مباشرة إلى صفحة العميل أو التتبع حسب الحالة.</p>
+      <div class="summary-list">
+        <div class="summary-item"><div class="summary-item-label">نوع الخدمة</div><div class="summary-item-value" id="summarySpeed">خلال ساعات العمل</div></div>
+        <div class="summary-item"><div class="summary-item-label">مبلغ الفاتورة</div><div class="summary-item-value" id="summaryInvoice">SAR 0.00</div></div>
+        <div class="summary-item"><div class="summary-item-label">رسوم الخدمة</div><div class="summary-item-value" id="summaryFee">SAR 0.00</div></div>
+        <div class="summary-item"><div class="summary-item-label">ضريبة رسوم الخدمة</div><div class="summary-item-value" id="summaryVat">SAR 0.00</div></div>
+        <div class="summary-item total"><div class="summary-item-label">الإجمالي</div><div class="summary-item-value" id="summaryTotal">SAR 0.00</div></div>
+      </div>
+      <div class="summary-next-step" id="summaryNextStep">سيتم حفظ الرحلة ثم الانتقال إلى إتمام الطلب داخل سلة.</div>
+      <div class="summary-actions"><p id="summaryNote" class="summary-note">سيتم حفظ الملخص على حساب سلة الحالي ثم تحويلك لإتمام الطلب.</p><button class="summary-submit" id="toCompleteBtn" type="button">إتمام الطلب</button><button class="summary-close" id="finishFlowBtn" type="button">إغلاق</button></div>
+    </div>
+  </div>
+  <script type="module" src="/js/sadady/theme-api.js"></script>
+  <script type="module" src="/js/sadady/auth.js"></script>
+  <script type="module" src="/js/sadady/live-home.js"></script>
+  <script type="module" src="/js/sadady/quote-flow.js"></script>
+  <script type="module" src="/js/sadady/checkout-flow.js"></script>
+</body>
+</html>
